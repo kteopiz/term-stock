@@ -6,17 +6,15 @@ The goal is not to document every change, but to capture _why_ certain approache
 
 This is to practice decision making in development on purpose and actively search and compare many options found through research.
 
+Decision template is provided but only the **Decision and Date header** and **Title** are required. The rest of the sections are optional.
+
 ---
 
-# Decision 001
+# Decision 000 (YYYY-MM-DD)
 
 ## Title
 
-Example title
-
-## Date
-
-YYYY-MM-DD
+Template
 
 ## Context
 
@@ -46,6 +44,18 @@ Cons
 
 - ***
 
-# Decision 002
+---
 
-...
+# Decision 001 (2026-08-07)
+
+## Title
+
+Add CodeRabbit to codebase (explains a lot already)
+
+## Why
+
+Several very good long term reasons to do this:
+
+- learn new AI tooling and integrate into workflows to get a feel for them + good for resume
+- Having a reviewer of any kind forces a git workflow and to re-think engineering decisions being made
+- TLDR win-win good for the project and myself long term
