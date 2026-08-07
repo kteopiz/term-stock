@@ -6,6 +6,8 @@ The goal is not to document every change, but to capture _why_ certain approache
 
 This is to practice decision making in development on purpose and actively search and compare many options found through research.
 
+Decision template is provided but only the **Decision and Date header** and **Title** are required. The rest of the sections are optional.
+
 ---
 
 # Decision 000 (YYYY-MM-DD)
