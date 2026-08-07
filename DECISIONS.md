@@ -8,15 +8,11 @@ This is to practice decision making in development on purpose and actively searc
 
 ---
 
-# Decision 001
+# Decision 000 (YYYY-MM-DD)
 
 ## Title
 
-Example title
-
-## Date
-
-YYYY-MM-DD
+Template
 
 ## Context
 
@@ -46,6 +42,4 @@ Cons
 
 - ***
 
-# Decision 002
-
-...
+---
