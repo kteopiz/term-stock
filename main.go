@@ -8,17 +8,33 @@ import (
 	"github.com/wnjoon/go-yfinance/pkg/utils"
 )
 
+// TODO: Move all to proper module (tickerInfo smth)
 type tickerInfo struct {
 	name        string
 	symbol      string
 	marketPrice float64
+	isValid     bool
 }
 
-// TODO: Move to proper file
 var EmptyTickerInfo = tickerInfo{
-	name:        "",
-	symbol:      "",
-	marketPrice: -1.0,
+	"",
+	"",
+	-1.0,
+	false,
+}
+
+func NewTickerInfo(name string, symbol string, marketPrice float64) tickerInfo {
+	new := tickerInfo{
+		name:        name,
+		symbol:      symbol,
+		marketPrice: marketPrice,
+	}
+
+	// Want to flag negative MP since implies error from fetch
+	// Since MP input is out of control from yfinance set based on value fetched instead of setting manually via. tickerInfo{}
+	new.isValid = marketPrice >= 0
+
+	return new
 }
 
 func processTickers(tickers []string) []tickerInfo {
@@ -33,14 +49,14 @@ func processTickers(tickers []string) []tickerInfo {
 		wg.Go(
 			func() {
 				ti, err := getTickerInfo(tickers[i])
-
-				// TODO
 				if err != nil {
-					fmt.Println("do something here!", err)
+					fmt.Printf("error: %s\n", err)
+					// flag isValid to show clear error and enforce action on TUI (TBD on action(s) to take: red line, disappearing ticker, show error in tabular section, etc.)
+					res[i].isValid = false
+				} else {
+					// Since each goroutine maps to a specifc index, don't need a mutex for updation, routines will ONLY update their designated spot in the slice.
+					res[i] = ti
 				}
-
-				// Since each goroutine maps to a specifc index, don't need a mutex for updation, routines will ONLY update their designated spot in the slice.
-				res[i] = ti
 			},
 		)
 	}
@@ -61,8 +77,6 @@ func getTickerInfo(tickerStr string) (tickerInfo, error) {
 		return EmptyTickerInfo, fmt.Errorf("empty ticker provided")
 	}
 
-	res := EmptyTickerInfo
-
 	// add .TO yfinance suffix
 	formattedTicker := utils.FormatYahooTicker(tickerStr, "XTSE")
 
@@ -70,9 +84,6 @@ func getTickerInfo(tickerStr string) (tickerInfo, error) {
 	if err != nil {
 		return EmptyTickerInfo, fmt.Errorf("failed to create new ticker: %w", err)
 	}
-
-	// Save for usefulness in possible Quote error msg
-	res.symbol = formattedTicker
 
 	// ERROR SOURCES
 
@@ -98,12 +109,19 @@ func getTickerInfo(tickerStr string) (tickerInfo, error) {
 	// Creating a quote creates a fetch to yfinance, uses crumb auth
 	quote, err := t.Quote()
 	if err != nil {
-		return res, fmt.Errorf("failed to get quote for %s %w", res.symbol, err)
+		return EmptyTickerInfo, fmt.Errorf("failed to get quote for %s %w", formattedTicker, err)
 	}
 
-	res.name = quote.LongName
-	res.symbol = quote.Symbol
-	res.marketPrice = quote.RegularMarketPrice
+	res := NewTickerInfo(
+		quote.LongName,
+		quote.Symbol,
+		quote.RegularMarketPrice,
+	)
+
+	// Edge: yfinance returns a negative stock price
+	if !res.isValid {
+		return EmptyTickerInfo, fmt.Errorf("invalid negative market price for %s", res.symbol)
+	}
 
 	return res, nil
 }
@@ -126,8 +144,8 @@ func main() {
 	// Part 4: Doc
 	// what did u learn, where do these logs go in docs struct??
 
-	tickers := [3]string{"TD", "RY", "VFV"}
-	for {
+	tickers := [4]string{"TD", "RY", "VFV", "DASKDKWAD"}
+	for range 5 {
 		infoState := processTickers(tickers[:])
 		fmt.Println(infoState)
 	}
